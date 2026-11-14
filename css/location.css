@@ -1,0 +1,43 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1f4d3a;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.3s ease;
+}
+
+body.state-glow {
+  background: #3f7a5f;
+}
+
+#location-line {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  transition: color 0.2s ease;
+}
+
+body.state-tapped #location-line {
+  color: #60a5fa;
+}
+
+/* Text that appears when the screen is tapped */
+#tap-text {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#tap-text.visible {
+  opacity: 1;
+}

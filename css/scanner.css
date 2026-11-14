@@ -1,0 +1,13 @@
+body {
+  background: #111;
+  color: #0f0;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+#webcam {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 12px;
+}
