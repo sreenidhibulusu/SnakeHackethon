@@ -69,8 +69,38 @@
       const ndef = new NDEFReader();
       document.body.addEventListener("click", async () => {
         await ndef.scan();
-        ndef.onreading = (event) => {
-          fetch(`https://ntfy.sh/${CHANNEL}`, { method: "POST", body: "UNLOCK_1" });
+        ndef.onreading = async (event) => {
+          let locationId;
+          for (const record of event.message.records) {
+            if (!["url", "text"].includes(record.recordType)) continue;
+            const value = new TextDecoder(record.encoding || "utf-8").decode(record.data).trim();
+            if (/^[123]$/.test(value)) {
+              locationId = value;
+              break;
+            }
+            try {
+              const url = new URL(value, window.location.href);
+              const candidate = url.searchParams.get("location") || url.searchParams.get("loc")
+                || url.pathname.match(/\/location([123])\.html$/)?.[1];
+              if (["1", "2", "3"].includes(candidate)) {
+                locationId = candidate;
+                break;
+              }
+            } catch {}
+          }
+          if (!locationId) {
+            statusText.innerText = "Tag has no valid location (1, 2 or 3).";
+            return;
+          }
+          try {
+            const response = await fetch(`https://ntfy.sh/${CHANNEL}`, {
+              method: "POST", body: `UNLOCK_${locationId}`
+            });
+            if (!response.ok) throw new Error("Scan could not be sent");
+            statusText.innerText = `Location ${locationId} scanned!`;
+          } catch {
+            statusText.innerText = "Could not send scan. Please scan again.";
+          }
         };
       }, { once: true });
     }
