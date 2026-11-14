@@ -2,7 +2,7 @@
   const snake = document.createElement("img");
 
   snake.className = "screen-snake";
-  snake.src = "snake.png";
+  snake.src = "picture/snake.png";
   snake.alt = "";
   snake.setAttribute("aria-hidden", "true");
 
@@ -87,7 +87,7 @@
   }
 
   snake.addEventListener("error", () => {
-    console.error("Could not load snake.png");
+    console.error("Could not load picture/snake.png");
     isAnimating = false;
   });
 
