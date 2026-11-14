@@ -76,6 +76,25 @@
     .reset-btn {
       margin-top: 14px; padding: 8px 16px; background: transparent;
       border: 1px solid #94a3b8; color: #cbd5e1; border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Location Navigation Links */
+    .location-nav {
+      position: fixed; bottom: 20px; display: flex; gap: 10px; z-index: 10;
+    }
+    .location-link {
+      padding: 8px 14px; border-radius: 8px;
+      background: rgba(30, 41, 59, 0.85); border: 1px solid #475569;
+      color: #cbd5e1; text-decoration: none; font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .location-link:hover, .location-link.active {
+      border-color: #f59e0b; color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+    }
+    .direction-box a {
+      color: #f59e0b; text-decoration: underline;
     }
   </style>
 </head>
@@ -109,51 +128,41 @@
     </div>
   </div>
 
+  <!-- LOCATION NAVIGATION LINKS -->
+  <nav class="location-nav" aria-label="Locations">
+    <a href="index.html" class="location-link active">Home</a>
+    <a href="location1.html?location=1" class="location-link" data-loc="1">Location 1</a>
+    <a href="location2.html?location=2" class="location-link" data-loc="2">Location 2</a>
+    <a href="location3.html?location=3" class="location-link" data-loc="3">Location 3</a>
+  </nav>
+
   <script>
-    // 1. MUSEUM PANELS DATA (Thomas & Manuela can edit text here)
-    const PANELS = {
-      "1": {
-        title: "Station 1: Harald's Great Rune Stone",
-        story: "I am the serpent carved onto this boulder in 965 AD. Here King Harald Bluetooth united Denmark and honored his parents, Gorm and Thyra.",
-        direction: "👉 <strong>Look at the South Face:</strong> Find my body coiled around the great beast, then walk north to <strong>Station 2 (Gorm's Mound)</strong>."
-      },
-      "2": {
-        title: "Station 2: King Gorm's Burial Mound",
-        story: "Beneath this mound lay the oak burial chamber of King Gorm the Old, guarding the silver Jelling Cup.",
-        direction: "👉 <strong>Look at the display case:</strong> Spot the S-shaped ribbon dragon on the silver cup, then head to <strong>Station 3 (The Stone Ship)</strong>."
-      },
-      "3": {
-        title: "Station 3: The 356m Viking Stone Ship",
-        story: "You stand inside the largest stone ship ever built by Vikings, enclosed by a massive royal oak palisade.",
-        direction: "👉 <strong>Follow the stone markers:</strong> Trace the hull lines stretching across the museum grounds."
-      }
+    const LOCATION_PAGES = {
+      "1": "location1.html?location=1",
+      "2": "location2.html?location=2",
+      "3": "location3.html?location=3"
     };
 
     const params = new URLSearchParams(window.location.search);
-    const locId = params.get("loc") || "1";
+    const requestedLoc = params.get("location") || params.get("loc");
+    const locId = requestedLoc || "1";
     const autoTap = params.get("tap") === "1";
+
+    // If opened with ?location=1, ?location=2, or ?location=3, route to that dedicated HTML page
+    if (requestedLoc && LOCATION_PAGES[requestedLoc]) {
+      window.location.replace(LOCATION_PAGES[requestedLoc]);
+    }
 
     let isActive = false;
     let lastTapTime = 0;
     let inactivityTimer = null;
 
-    // 2. EDGE CASE: Load Panel Data & Debounce Double-Taps
+    // Tapping the Runestone on index.html opens the target location page
     function activatePanel() {
       const now = Date.now();
-      if (isActive && (now - lastTapTime < 4000)) return; // Ignore accidental double-tap within 4s
+      if (isActive && (now - lastTapTime < 4000)) return;
       lastTapTime = now;
-      isActive = true;
-
-      const data = PANELS[locId] || PANELS["1"]; // Fallback if URL param is missing/wrong
-      document.getElementById("p-title").textContent = data.title;
-      document.getElementById("p-story").textContent = data.story;
-      document.getElementById("p-direct").innerHTML = data.direction;
-
-      document.body.className = "state-active";
-
-      // Restart 30-second auto-reset timer (if visitor walks away)
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(resetToSleep, 30000);
+      window.location.href = LOCATION_PAGES[locId] || LOCATION_PAGES["1"];
     }
 
     function resetToSleep() {
@@ -162,7 +171,7 @@
       document.getElementById("stone-status").textContent = "Runestone Sleeping";
     }
 
-    // 3. HOOK FOR JUAN'S PROXIMITY GLOW
+    // HOOK FOR JUAN'S PROXIMITY GLOW
     window.setGlowState = function(isNear) {
       if (isActive) return; // Don't interrupt active story
       if (isNear) {
@@ -173,15 +182,18 @@
       }
     };
 
-    // If opened by NFC tap (?loc=1&tap=1), start immediately
+    // If opened by NFC tap (?location=1&tap=1), start immediately
     if (autoTap) {
       activatePanel();
     }
 
-    // Keyboard shortcuts for quick laptop testing (G = Glow, 1/2/3 = Activate)
+    // Keyboard shortcuts for quick laptop testing (G = Glow, Space = Activate, 1/2/3 = Switch Location)
     window.addEventListener("keydown", (e) => {
       if (e.key.toLowerCase() === "g") window.setGlowState(true);
       if (e.key === " ") activatePanel();
+      if (["1", "2", "3"].includes(e.key)) {
+        window.location.href = LOCATION_PAGES[e.key];
+      }
     });
   </script>
 </body>
