@@ -1,69 +1,128 @@
-// A single snake that slithers across the screen from left to right.
-// Call window.SnakeAnimation.play() to start it (ignored while it is already crossing).
-// It also plays when the page starts glowing (body gets the "state-glow" class).
+
 (() => {
   const snake = document.createElement("img");
+
   snake.className = "screen-snake";
-  snake.src = "snake-animation.png";
+  snake.src = "snake.png";
   snake.alt = "";
   snake.setAttribute("aria-hidden", "true");
+
   document.body.appendChild(snake);
 
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  );
+
   let isAnimating = false;
+  let loading = false;
+  let cooldown = false;
+
+  const delayAfterExit = 2000; // 2 seconds 
 
   function play() {
-    if (prefersReducedMotion.matches || isAnimating) return;
-    if (!snake.complete || snake.naturalWidth === 0) {
-      snake.addEventListener("load", play, { once: true });
-      return;
+  if (prefersReducedMotion.matches || isAnimating || cooldown) return;
+
+  if (!snake.complete || snake.naturalWidth === 0) {
+    if (!loading) {
+      loading = true;
+      snake.addEventListener("load", () => {
+        loading = false;
+        play();
+      }, { once: true });
     }
-
-    isAnimating = true;
-
-    const { width, height } = snake.getBoundingClientRect();
-    const startX = -width - 24;
-    const endX = window.innerWidth + 24;
-    const y = Math.random() * Math.max(0, window.innerHeight - height);
-    const xAt = (progress) => startX + (endX - startX) * progress;
-    const pose = (progress, offsetY, rotation) => ({
-      offset: progress,
-      opacity: progress === 0 || progress === 1 ? 0 : 1,
-      transform: `translate3d(${xAt(progress)}px, ${offsetY}px, 0) rotate(${rotation}deg)`
-    });
-
-    snake.style.top = `${y}px`;
-    const animation = snake.animate([
-      pose(0, 0, -4),
-      pose(0.1, -8, 2),
-      pose(0.3, 8, -2),
-      pose(0.5, -8, 2),
-      pose(0.7, 8, -2),
-      pose(0.9, -8, 2),
-      pose(1, 0, -4)
-    ], {
-      duration: 6500,
-      easing: "ease-in-out"
-    });
-
-    animation.onfinish = () => {
-      isAnimating = false;
-    };
+    return;
   }
 
+  isAnimating = true;
+
+  const width = snake.getBoundingClientRect().width;
+  const height = snake.getBoundingClientRect().height;
+
+  // Start completely outside the LEFT side
+  const startX = -width - 50;
+
+  // Finish completely outside the RIGHT side
+  const endX = window.innerWidth + 50;
+
+  const y = Math.random() * Math.max(
+    0,
+    window.innerHeight - height
+  );
+
+  const duration = 6500;
+  const baseRotation = 90;
+
+  let startTime = null;
+
+  function slither(timestamp) {
+    if (!startTime) startTime = timestamp;
+
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    const x = startX + (endX - startX) * progress;
+
+    const wave = Math.sin(elapsed / 300);
+    const vertical = Math.cos(elapsed / 300) * 5;
+    const rotation = baseRotation + wave * 8;
+    const scale = 1 + Math.sin(elapsed / 300) * 0.025;
+
+    snake.style.transform = `
+      translate3d(${x}px, ${y + vertical}px, 0)
+      rotate(${rotation}deg)
+      scale(${scale})
+    `;
+
+    if (progress < 1) {
+      requestAnimationFrame(slither);
+    } else {
+      // Snake has completely left the screen
+      snake.style.transform = `
+        translate3d(${endX}px, ${y}px, 0)
+        rotate(${baseRotation}deg)
+      `;
+
+      isAnimating = false;
+      cooldown = true;
+
+      // Wait before allowing another animation
+      setTimeout(() => {
+        cooldown = false;
+      }, delayAfterExit);
+    }
+  }
+
+  // Hide the snake at its starting position before animation
+  snake.style.transform =
+    `translate3d(${startX}px, ${y}px, 0) rotate(90deg)`;
+
+  requestAnimationFrame(slither);
+}
+
+
   snake.addEventListener("error", () => {
-    console.error("Could not load the snake animation image: snake-animation.png");
+    console.error("Could not load snake.png");
+    isAnimating = false;
   });
 
-  // Play once each time the page switches into the glow state
+  // Detect glow state
   let wasGlowing = document.body.classList.contains("state-glow");
+
   new MutationObserver(() => {
     const isGlowing = document.body.classList.contains("state-glow");
-    if (isGlowing && !wasGlowing) play();
+
+    if (isGlowing && !wasGlowing) {
+      play();
+    }
+
     wasGlowing = isGlowing;
-  }).observe(document.body, { attributeFilter: ["class"] });
+  }).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
 
   if (wasGlowing) play();
 
   window.SnakeAnimation = { play };
+
 })();
