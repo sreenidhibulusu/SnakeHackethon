@@ -1,0 +1,16 @@
+.screen-snake {
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate3d(-600px, 0, 0);
+}
+
+.screen-snake[hidden] {
+  display: none;
+}
