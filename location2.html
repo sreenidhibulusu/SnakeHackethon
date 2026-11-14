@@ -81,22 +81,6 @@
       border: 1px solid #94a3b8; color: #cbd5e1; border-radius: 6px;
       cursor: pointer;
     }
-
-    /* Location Navigation Links */
-    .location-nav {
-      position: fixed; bottom: 20px; display: flex; gap: 10px; z-index: 10;
-      flex-wrap: wrap; justify-content: center;
-    }
-    .location-link {
-      padding: 8px 14px; border-radius: 8px;
-      background: rgba(30, 41, 59, 0.85); border: 1px solid #475569;
-      color: #cbd5e1; text-decoration: none; font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-    .location-link:hover, .location-link.active {
-      border-color: #f59e0b; color: #f59e0b;
-      background: rgba(245, 158, 11, 0.15);
-    }
   </style>
 </head>
 <body class="state-active">
@@ -130,14 +114,6 @@
       <button class="reset-btn" onclick="resetToSleep()">Put Stone to Sleep</button>
     </div>
   </div>
-
-  <!-- LOCATION NAVIGATION LINKS -->
-  <nav class="location-nav" aria-label="Locations">
-    <a href="index.html" class="location-link">Home</a>
-    <a href="location1.html?location=1" class="location-link">Location 1</a>
-    <a href="location2.html?location=2" class="location-link active">Location 2</a>
-    <a href="location3.html?location=3" class="location-link">Location 3</a>
-  </nav>
 
   <script>
     // Ensure URL has ?location=2 for clarity/tracking
