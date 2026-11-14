@@ -14,17 +14,17 @@
   <h1 id="title">NFC tag scanned</h1>
   <p id="status" role="status">Sending scan to the location display…</p>
   <button id="retry" hidden>Try again</button>
+  <script src="channel.js"></script>
   <script>
-    const CHANNEL = "jelling-snake-hackathon-2026";
-    const params = new URLSearchParams(window.location.search);
-    const locationId = params.get("location") || params.get("loc");
+    const CHANNEL = window.jellingChannel;
+    const locationId = window.jellingPair;
     const status = document.getElementById("status");
     const retry = document.getElementById("retry");
 
     async function sendScan() {
       retry.hidden = true;
       if (!["1", "2", "3"].includes(locationId)) {
-        status.textContent = "Unknown location. Use scan.html?location=1, 2 or 3.";
+        status.textContent = "Unknown pair. Use scan.html?pair=1, 2 or 3.";
         return;
       }
       document.getElementById("title").textContent = `Location ${locationId} — NFC tag scanned`;

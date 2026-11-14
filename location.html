@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Location 3: The 356m Viking Stone Ship | Jelling Guide</title>
+  <title>Location Display | Jelling Guide</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -54,9 +54,6 @@
       align-items: center; justify-content: center;
       background: #000; box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
     }
-    .snake-container video, .snake-container img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
 
     .panel-card {
       max-width: 420px; background: rgba(30, 41, 59, 0.9);
@@ -68,9 +65,6 @@
       background: rgba(245, 158, 11, 0.15); border-left: 4px solid #f59e0b;
       padding: 10px; font-size: 0.95rem; text-align: left; border-radius: 6px;
     }
-    .direction-box a {
-      color: #f59e0b; text-decoration: underline;
-    }
     .reset-btn {
       margin-top: 14px; padding: 8px 16px; background: transparent;
       border: 1px solid #94a3b8; color: #cbd5e1; border-radius: 6px;
@@ -78,85 +72,30 @@
     }
   </style>
 </head>
-<body class="state-active">
+<body class="state-sleep">
 
   <div id="stone-view" onclick="activatePanel()">
     <div class="rune-symbol">ᚼᛒ</div>
-    <h2 id="stone-status">Runestone Sleeping — Location 3</h2>
+    <h2 id="stone-status" aria-live="polite">Waiting for NFC scan</h2>
     <p id="stone-sub" style="margin-top:8px; color:#94a3b8;">
-      Step closer or tap your Norse Serpent to awaken
+      Scan this location’s NFC tag to awaken the runestone
     </p>
   </div>
 
   <div id="panel-view">
     <div class="snake-container">
-      <video id="snake-vid" src="snake.mp4" autoplay loop muted playsinline
-             onerror="this.outerHTML='<span style=\'font-size:4rem\'>🐍</span>'">
-      </video>
+      <span role="img" aria-label="Serpent" style="font-size:4rem">🐍</span>
     </div>
 
     <div class="panel-card">
-      <h1 class="panel-title">Station 3: The 356m Viking Stone Ship</h1>
-      <p class="panel-story">
-        You stand inside the largest stone ship ever built by Vikings, enclosed by a massive royal oak palisade.
-      </p>
-      <div class="direction-box">
-        👉 <strong>Follow the stone markers:</strong> Trace the hull lines stretching across the museum grounds, or return to <a id="next-station-link" href="location1.html?location=1"><strong>Station 1 (Harald's Great Rune Stone)</strong></a>.
-      </div>
+      <h1 class="panel-title" id="station-title"></h1>
+      <p class="panel-story" id="station-story"></p>
+      <div class="direction-box" id="station-direction"></div>
       <button class="reset-btn" onclick="resetToSleep()">Put Stone to Sleep</button>
     </div>
   </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const pair = params.get("pair") || "1";
-    const CHANNEL = `jelling-snake-hackathon-2026-${pair}`;
-
-    document.getElementById("next-station-link").href = `location1.html?location=1&pair=${pair}`;
-
-    if (!document.referrer) {
-      fetch(`https://ntfy.sh/${CHANNEL}`, { method: "POST", body: "UNLOCK_3" }).catch(() => {});
-    }
-
-    let isActive = true;
-    let inactivityTimer = setTimeout(resetToSleep, 30000);
-
-    function activatePanel() {
-      isActive = true;
-      document.body.className = "state-active";
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(resetToSleep, 30000);
-    }
-
-    function resetToSleep() {
-      isActive = false;
-      document.body.className = "state-sleep";
-      document.getElementById("stone-status").textContent = "Runestone Sleeping — Location 3";
-    }
-
-    function setGlowState(isNear) {
-      if (isActive) return;
-      if (isNear) {
-        document.body.className = "state-glow";
-        document.getElementById("stone-status").textContent = "The Runestone Awakens!";
-      } else {
-        resetToSleep();
-      }
-    }
-
-    const eventSource = new EventSource(`https://ntfy.sh/${CHANNEL}/sse`);
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        const command = (data.message || "").trim();
-
-        if (command === "GLOW_ON") setGlowState(true);
-        else if (command === "GLOW_OFF") setGlowState(false);
-        else if (command === "UNLOCK_1") window.location.href = `location1.html?location=1&pair=${pair}`;
-        else if (command === "UNLOCK_2") window.location.href = `location2.html?location=2&pair=${pair}`;
-        else if (command === "UNLOCK_3") activatePanel();
-      } catch (e) {}
-    };
-  </script>
+  <script src="channel.js"></script>
+  <script src="display.js"></script>
 </body>
 </html>
