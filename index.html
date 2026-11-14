@@ -48,43 +48,27 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const urlPair = params.get("pair") || params.get("id");
-    if (urlPair) {
-      localStorage.setItem("snake_pair_id", urlPair);
-    }
-    const pairId = urlPair || localStorage.getItem("snake_pair_id") || "1";
-    const CHANNEL = `jelling-snake-hackathon-2026-${pairId}`;
+    const locationId = params.get("location");
+    const pair = params.get("pair") || "1";
+    const CHANNEL = `jelling-snake-hackathon-2026-${pair}`;
 
-    const LOCATION_PAGES = {
-      "1": `location1.html?location=1&pair=${encodeURIComponent(pairId)}`,
-      "2": `location2.html?location=2&pair=${encodeURIComponent(pairId)}`,
-      "3": `location3.html?location=3&pair=${encodeURIComponent(pairId)}`
-    };
-
-    const requestedLoc = params.get("location") || params.get("loc");
-    const locId = requestedLoc || "1";
-
-    if (requestedLoc && LOCATION_PAGES[requestedLoc]) {
-      window.location.replace(LOCATION_PAGES[requestedLoc]);
+    if (locationId === "1" || locationId === "2" || locationId === "3") {
+      window.location.replace(`location${locationId}.html?location=${locationId}&pair=${pair}`);
     }
 
     function activatePanel() {
-      window.location.href = LOCATION_PAGES[locId] || LOCATION_PAGES["1"];
+      window.location.href = `location1.html?location=1&pair=${pair}`;
     }
 
-    function resetToSleep() {
-      document.body.className = "state-sleep";
-      document.getElementById("stone-status").textContent = "Runestone Sleeping";
-    }
-
-    window.setGlowState = function(isNear) {
+    function setGlowState(isNear) {
       if (isNear) {
         document.body.className = "state-glow";
         document.getElementById("stone-status").textContent = "The Runestone Awakens!";
       } else {
-        resetToSleep();
+        document.body.className = "state-sleep";
+        document.getElementById("stone-status").textContent = "Runestone Sleeping";
       }
-    };
+    }
 
     const eventSource = new EventSource(`https://ntfy.sh/${CHANNEL}/sse`);
     eventSource.onmessage = (event) => {
@@ -92,27 +76,13 @@
         const data = JSON.parse(event.data);
         const command = (data.message || "").trim();
 
-        if (command === "GLOW_ON") {
-          window.setGlowState(true);
-        } else if (command === "GLOW_OFF") {
-          window.setGlowState(false);
-        } else if (command === "UNLOCK_1") {
-          window.location.href = `${LOCATION_PAGES["1"]}&remote=1`;
-        } else if (command === "UNLOCK_2") {
-          window.location.href = `${LOCATION_PAGES["2"]}&remote=1`;
-        } else if (command === "UNLOCK_3") {
-          window.location.href = `${LOCATION_PAGES["3"]}&remote=1`;
-        }
+        if (command === "GLOW_ON") setGlowState(true);
+        else if (command === "GLOW_OFF") setGlowState(false);
+        else if (command === "UNLOCK_1") window.location.href = `location1.html?location=1&pair=${pair}`;
+        else if (command === "UNLOCK_2") window.location.href = `location2.html?location=2&pair=${pair}`;
+        else if (command === "UNLOCK_3") window.location.href = `location3.html?location=3&pair=${pair}`;
       } catch (e) {}
     };
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key.toLowerCase() === "g") window.setGlowState(true);
-      if (e.key === " ") activatePanel();
-      if (["1", "2", "3"].includes(e.key)) {
-        window.location.href = LOCATION_PAGES[e.key];
-      }
-    });
   </script>
 </body>
 </html>
