@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choose a weapon | Build a Viking</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="character.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="channel.js" defer></script>
+  <script src="display.js" defer></script>
+</head>
+<body data-page="weapons">
+  <main>
+    <p class="step">Build a Viking · 3 / 4</p>
+    <h1>Choose a weapon</h1>
+    <p id="scan-connection" role="status">Connecting to NFC scans…</p>
+    <div class="builder">
+      <section class="preview" aria-label="Your Viking">
+        <div id="character-art"></div>
+        <h2 id="preview-name"></h2>
+      </section>
+      <section class="customize" aria-label="Choose a weapon">
+        <h2>Pick one weapon.</h2><div class="options" id="choices"></div>
+        <nav aria-label="Build steps"><a data-destination="seasons.html" href="seasons.html">← Back</a></nav>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

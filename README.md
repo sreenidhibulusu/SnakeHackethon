@@ -1,40 +1,39 @@
-# Jelling displays
+# Build a Viking
 
-Only two pages are needed. The `pair` parameter selects the station and its
-channel. Use the same pair on the laptop, NFC tag and proximity controller.
+The builder has four pages:
 
-| Pair | Laptop display | NFC tag URL |
-| --- | --- | --- |
-| 1 | `location.html?pair=1` | `https://YOUR-HOST/scan.html?pair=1` |
-| 2 | `location.html?pair=2` | `https://YOUR-HOST/scan.html?pair=2` |
-| 3 | `location.html?pair=3` | `https://YOUR-HOST/scan.html?pair=3` |
+1. `index.html` — choose man or woman.
+2. `seasons.html` — choose spring, summer, autumn, or winter clothing.
+3. `weapons.html` — choose spear, bow, sword, or axe.
+4. `result.html` — see the finished Viking and type a name to display in runes.
 
-Include the hosted folder path in the URLs. For example:
-`https://sreenidhibulusu.github.io/SnakeHackethon/scan.html?pair=3`.
+Vikings begin unarmed in a patched, ragged tunic. Weapons and seasonal clothing
+appear only after selection.
 
-Update existing NFC tags from `locationN.html` to the matching `scan.html?pair=N`
-URL. The old numbered pages have been removed. Publish these changes before
-using the new URLs.
+Click a choice to move to the next page. Back links preserve your choices.
+Start again clears the character choices. Choices and the NFC pair travel in
+URL parameters, so refreshing a page preserves the build.
 
-The display says **Ready** when connected. Opening the scan URL sends
-`UNLOCK_N` to `jelling-snake-hackathon-2026-N`, making that pair’s display glow
-for 30 seconds. Repeated scans restart the timer. Loading a display does not
-send a scan. Both devices need internet access.
+`character.js` shares the illustration across the pages; `app.js` handles choices
+and rune naming. Keep these files alongside the HTML pages when hosting.
 
-The existing controller can send `GLOW_ON` / `GLOW_OFF` on the same channel,
-or call `window.setGlowState(true/false)` on the display. Clicking the runestone
-shows its station story. Press **G** to test glow and **Escape** to reset.
+## NFC scan
 
-On each display, click **Enable camera** and allow webcam access. A person
-near the center of the camera image, filling at least 20% of its width, makes
-that laptop glow. After about 1.5 seconds without a detection it sleeps.
-NFC glow and open stories keep their 30-second timers and are not interrupted
-by camera updates. Use **Disable camera** to stop the webcam.
+Open `index.html` on the display. Write the hosted `scan.html` URL to its NFC
+tag. Opening that URL sends a signal that makes the display glow for 30 seconds.
+Another scan restarts the timer. Character choices and naming stay available.
 
-Camera detection runs in the browser; video is not uploaded. The detector
-downloads from MediaPipe on startup, so internet access is needed. Use HTTPS
-(including GitHub Pages) or localhost (including VS Code Live Server).
-Detection depends on lighting, framing and camera placement; it estimates
-presence in the image, not physical distance from the screen.
+For example, if this workspace is hosted at `https://YOUR-HOST/`, use:
 
-`channel.js`, `display.js` and `presence.js` are required scripts, not separate pages.
+- Display: `https://YOUR-HOST/build-a-viking/index.html?pair=1`
+- NFC tag: `https://YOUR-HOST/build-a-viking/scan.html?pair=1`
+
+Include the actual hosted folder path. Pairs `1`, `2`, and `3` are supported;
+omitting `pair` defaults to `1`. Use the same pair on both devices.
+
+Both devices need internet access. The display says **ready** once connected.
+Scans use the same ntfy.sh approach as SnakeHackethon, with separate channels
+`build-a-viking-hackathon-2026-N`. Loading the builder never sends a scan.
+
+Serve the folder using Live Server or a static website host. Publish these files
+before writing the hosted scan URL onto a tag.
