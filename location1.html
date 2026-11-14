@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Location 1: Harald's Great Rune Stone | Jelling Guide</title>
+  <div class="snake-container">
+  <img id="snakeImage" src="picture/snake.png" alt="Snake">
+  </div>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -20,19 +23,7 @@
     body.state-sleep #stone-view { display: flex; opacity: 0.4; }
 
     /* STATE 2: GLOWING RUNESTONE (When visitor is near) */
-    body.state-glow {
-      background: #131c31;
-      box-shadow: inset 0 0 80px #f59e0b;
-    }
-    body.state-glow #panel-view { display: none; }
-    body.state-glow #stone-view {
-      display: flex; opacity: 1;
-      animation: pulseGlow 1s infinite alternate;
-    }
-    @keyframes pulseGlow {
-      from { transform: scale(0.96); filter: drop-shadow(0 0 10px #f59e0b); }
-      to { transform: scale(1.05); filter: drop-shadow(0 0 35px #f59e0b); }
-    }
+
 
     /* STATE 3: ACTIVE MUSEUM PANEL & SNAKE ANIMATION */
     body.state-active #stone-view { display: none; }
@@ -53,7 +44,6 @@
     /* Container for Lita's 3D Snake Render */
     .snake-container {
       width: 220px; height: 220px; border-radius: 50%;
-      border: 3px solid #f59e0b; overflow: hidden;
       margin-bottom: 20px; display: flex;
       align-items: center; justify-content: center;
       background: #000; box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
@@ -61,6 +51,7 @@
     .snake-container video, .snake-container img {
       width: 100%; height: 100%; object-fit: cover;
     }
+
 
     /* Thomas & Manuela's Museum Panel Card */
     .panel-card {
@@ -81,10 +72,57 @@
       border: 1px solid #94a3b8; color: #cbd5e1; border-radius: 6px;
       cursor: pointer;
     }
+    #snakeImage {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    transform-origin: center;
+    will-change: transform;
+  }
+
+.snake-container {
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+
+
+  position: fixed;
+  top: 50%;
+  left: 0;
+
+  animation: snakeMove 8s linear infinite;
+}
+
+#snakeImage {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  animation: snakeSlither 1s ease-in-out infinite;
+}
+
+@keyframes snakeMove {
+  0% {
+    left: -230px;
+  }
+  100% {
+    left: 100vw;
+  }
+}
+
+@keyframes snakeSlither {
+  0%, 100% {
+    transform: translateY(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(10deg);
+  }
+}
+
+    
   </style>
 </head>
 <body class="state-active">
-
+   
   <!-- SLEEPING / GLOWING RUNESTONE VIEW -->
   <div id="stone-view" onclick="activatePanel()">
     <div class="rune-symbol">ᚼᛒ</div>
@@ -94,14 +132,6 @@
     </p>
   </div>
 
-  <!-- ACTIVE SNAKE & MUSEUM PANEL VIEW (LOCATION 1 CONTENT) -->
-  <div id="panel-view">
-    <div class="snake-container">
-      <!-- Replace snake.mp4 with Lita's render file in the repo -->
-      <video id="snake-vid" src="snake.mp4" autoplay loop muted playsinline
-             onerror="this.outerHTML='<span style=\'font-size:4rem\'>🐍</span>'">
-      </video>
-    </div>
 
     <div class="panel-card">
       <h1 class="panel-title">Station 1: Harald's Great Rune Stone</h1>
@@ -151,6 +181,40 @@
       }
     };
 
+
+function animateSnake() {
+  const snake = document.getElementById("snakeImage");
+
+  let startTime = null;
+
+  function slither(timestamp) {
+    if (!startTime) startTime = timestamp;
+
+    const time = (timestamp - startTime) / 1000;
+
+    // Smooth wave movement
+    const wave = Math.sin(time * 3);
+
+    const rotation = wave * 8;
+    const horizontal = Math.sin(time * 3) * 8;
+    const vertical = Math.cos(time * 3) * 4;
+    const scale = 1 + Math.sin(time * 3) * 0.025;
+
+    snake.style.transform = `
+      translate(${horizontal}px, ${vertical}px)
+      rotate(${rotation}deg)
+      scale(${scale})
+    `;
+
+    requestAnimationFrame(slither);
+  }
+
+  requestAnimationFrame(slither);
+}
+
+animateSnake();
+
+
     window.addEventListener("keydown", (e) => {
       if (e.key.toLowerCase() === "g") window.setGlowState(true);
       if (e.key === " ") activatePanel();
@@ -158,6 +222,8 @@
         window.location.href = `location${e.key}.html?location=${e.key}`;
       }
     });
+
+
   </script>
 </body>
 </html>
