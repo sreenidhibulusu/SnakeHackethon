@@ -25,4 +25,4 @@ The existing controller can send `GLOW_ON` / `GLOW_OFF` on the same channel,
 or call `window.setGlowState(true/false)` on the display. Clicking the runestone
 shows its station story. Press **G** to test glow and **Escape** to reset.
 
-`channel.js` and `display.js` are required scripts, not separate pages.
+`js/channel.js`, `js/display.js`, `js/scan.js`, and `js/snake-animation.js` are required scripts in `js/`, with styles in `css/`.

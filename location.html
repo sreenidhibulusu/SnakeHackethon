@@ -12,14 +12,14 @@
   <div id="stone-view" onclick="activatePanel()">
     <div class="rune-symbol">ᚼᛒ</div>
     <h2 id="stone-status" aria-live="polite">Waiting for NFC scan</h2>
-    <p id="stone-sub" style="margin-top:8px; color:#94a3b8;">
+    <p id="stone-sub">
       Scan this location’s NFC tag to awaken the runestone
     </p>
   </div>
 
   <div id="panel-view">
     <div class="snake-container">
-      <span role="img" aria-label="Serpent" style="font-size:4rem">🐍</span>
+      <span role="img" aria-label="Serpent" class="serpent-icon">🐍</span>
     </div>
 
     <div class="panel-card">
@@ -31,7 +31,7 @@
   </div>
 
   <script src="js/snake-animation.js"></script>
-  <script src="channel.js"></script>
-  <script src="display.js"></script>
+  <script src="js/channel.js"></script>
+  <script src="js/display.js"></script>
 </body>
 </html>
