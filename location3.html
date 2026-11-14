@@ -15,11 +15,9 @@
       transition: background 0.5s ease, box-shadow 0.5s ease;
     }
 
-    /* STATE 1: SLEEPING RUNESTONE */
     body.state-sleep #panel-view { display: none; }
     body.state-sleep #stone-view { display: flex; opacity: 0.4; }
 
-    /* STATE 2: GLOWING RUNESTONE (When visitor is near) */
     body.state-glow {
       background: #131c31;
       box-shadow: inset 0 0 80px #f59e0b;
@@ -34,7 +32,6 @@
       to { transform: scale(1.05); filter: drop-shadow(0 0 35px #f59e0b); }
     }
 
-    /* STATE 3: ACTIVE MUSEUM PANEL & SNAKE ANIMATION */
     body.state-active #stone-view { display: none; }
     body.state-active #panel-view {
       display: flex; flex-direction: column; align-items: center;
@@ -50,7 +47,6 @@
     }
     .rune-symbol { font-size: 5rem; color: #f59e0b; margin-bottom: 16px; }
 
-    /* Container for Lita's 3D Snake Render */
     .snake-container {
       width: 220px; height: 220px; border-radius: 50%;
       border: 3px solid #f59e0b; overflow: hidden;
@@ -62,7 +58,6 @@
       width: 100%; height: 100%; object-fit: cover;
     }
 
-    /* Thomas & Manuela's Museum Panel Card */
     .panel-card {
       max-width: 420px; background: rgba(30, 41, 59, 0.9);
       border: 1px solid #f59e0b; border-radius: 16px; padding: 20px;
@@ -85,7 +80,6 @@
 </head>
 <body class="state-active">
 
-  <!-- SLEEPING / GLOWING RUNESTONE VIEW -->
   <div id="stone-view" onclick="activatePanel()">
     <div class="rune-symbol">ᚼᛒ</div>
     <h2 id="stone-status">Runestone Sleeping — Location 3</h2>
@@ -94,10 +88,8 @@
     </p>
   </div>
 
-  <!-- ACTIVE SNAKE & MUSEUM PANEL VIEW (LOCATION 3 CONTENT) -->
   <div id="panel-view">
     <div class="snake-container">
-      <!-- Replace snake.mp4 with Lita's render file in the repo -->
       <video id="snake-vid" src="snake.mp4" autoplay loop muted playsinline
              onerror="this.outerHTML='<span style=\'font-size:4rem\'>🐍</span>'">
       </video>
@@ -116,7 +108,14 @@
   </div>
 
   <script>
-    // Ensure URL has ?location=3 for clarity/tracking
+    const CHANNEL = "jelling-snake-hackathon-2026";
+    const params = new URLSearchParams(window.location.search);
+    const isRemote = params.get("remote") === "1";
+
+    if (!isRemote) {
+      fetch(`https://ntfy.sh/${CHANNEL}`, { method: "POST", body: "UNLOCK_3" }).catch(() => {});
+    }
+
     if (!window.location.search.includes("location=3")) {
       window.history.replaceState(null, "", "?location=3");
     }
@@ -149,6 +148,26 @@
       } else {
         resetToSleep();
       }
+    };
+
+    const eventSource = new EventSource(`https://ntfy.sh/${CHANNEL}/sse`);
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const command = (data.message || "").trim();
+
+        if (command === "GLOW_ON") {
+          window.setGlowState(true);
+        } else if (command === "GLOW_OFF") {
+          window.setGlowState(false);
+        } else if (command === "UNLOCK_1") {
+          window.location.href = "location1.html?location=1&remote=1";
+        } else if (command === "UNLOCK_2") {
+          window.location.href = "location2.html?location=2&remote=1";
+        } else if (command === "UNLOCK_3") {
+          activatePanel();
+        }
+      } catch (e) {}
     };
 
     window.addEventListener("keydown", (e) => {
