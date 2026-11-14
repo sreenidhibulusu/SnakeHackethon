@@ -17,11 +17,12 @@
   };
 
   window.visitorAnswers = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-  window.currentVisitorToken = window.jellingToken || "token1";
+  window.currentVisitorToken = window.jellingToken;
 
   const locationId = window.jellingPair;
   const statusText = document.getElementById("stone-status");
   const hint = document.getElementById("stone-sub");
+  const proceedMsg = document.getElementById("proceed-msg");
   const station = locations[locationId];
 
   if (!station) {
@@ -39,14 +40,13 @@
     }
     window.visitorAnswers[token][stationId] = answer;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(window.visitorAnswers));
-    if (token === window.currentVisitorToken) {
-      renderMCQ();
-    }
   }
 
   function recordMCQAnswer(choiceText) {
     const token = window.currentVisitorToken;
     saveAnswerLocally(token, locationId, choiceText);
+    renderMCQ();
+    proceedMsg.hidden = false;
 
     clearTimeout(resetTimer);
     resetTimer = setTimeout(resetToSleep, 30000);
@@ -88,6 +88,7 @@
 
   function resetToSleep() {
     clearTimeout(resetTimer);
+    proceedMsg.hidden = true;
     document.body.className = "state-sleep";
     statusText.textContent = `Waiting for NFC scan — Location ${locationId}`;
   }
@@ -97,27 +98,13 @@
     document.body.className = `state-${state}`;
     statusText.textContent = `NFC scanned — Location ${locationId}`;
     if (state === "active") {
+      proceedMsg.hidden = true;
       renderMCQ();
     }
     resetTimer = setTimeout(resetToSleep, 30000);
   }
 
-  function activatePanel() {
-    showState("active");
-  }
-
-  window.setGlowState = (isNear) => {
-    if (document.body.className === "state-active") return;
-    if (isNear) {
-      showState("glow");
-      statusText.textContent = `The Runestone Awakens! — Location ${locationId}`;
-    } else {
-      resetToSleep();
-    }
-  };
-
-  window.resetToSleep = resetToSleep;
-  window.activatePanel = activatePanel;
+  window.showState = showState;
   resetToSleep();
 
   fetch(`https://ntfy.sh/${window.jellingStateChannel}/json?poll=1`)
@@ -126,8 +113,7 @@
       lines.split("\n").forEach((line) => {
         if (!line.trim()) return;
         try {
-          const eventObj = JSON.parse(line);
-          const payload = JSON.parse(eventObj.message || "{}");
+          const payload = JSON.parse(JSON.parse(line).message || "{}");
           if (payload.type === "MCQ_ANSWER" && payload.token && payload.station && payload.answer) {
             saveAnswerLocally(payload.token, payload.station, payload.answer);
           }
@@ -139,8 +125,7 @@
   const stateEvents = new EventSource(`https://ntfy.sh/${window.jellingStateChannel}/sse`);
   stateEvents.onmessage = (event) => {
     try {
-      const eventObj = JSON.parse(event.data);
-      const payload = JSON.parse(eventObj.message || "{}");
+      const payload = JSON.parse(JSON.parse(event.data).message || "{}");
       if (payload.type === "MCQ_ANSWER" && payload.token && payload.station && payload.answer) {
         saveAnswerLocally(payload.token, payload.station, payload.answer);
       }
@@ -168,15 +153,15 @@
         }
         showState("active");
       } else if (trimmed === "GLOW_ON") {
-        window.setGlowState(true);
+        if (document.body.className !== "state-active") {
+          showState("glow");
+          statusText.textContent = `The Runestone Awakens! — Location ${locationId}`;
+        }
       } else if (trimmed === "GLOW_OFF") {
-        window.setGlowState(false);
+        if (document.body.className !== "state-active") {
+          resetToSleep();
+        }
       }
     } catch {}
   };
-
-  window.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() === "g") showState("glow");
-    if (event.key === "Escape") resetToSleep();
-  });
 })();

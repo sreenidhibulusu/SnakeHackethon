@@ -94,11 +94,19 @@
       color: #090d16;
       border-color: #fde68a;
     }
+
+    .proceed-msg {
+      margin-top: 28px;
+      color: #f59e0b;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body class="state-sleep">
 
-  <div id="stone-view" onclick="activatePanel()">
+  <div id="stone-view" onclick="showState('active')">
     <div class="rune-symbol">ᚼᛒ</div>
     <h2 id="stone-status" aria-live="polite">Waiting for NFC scan</h2>
     <p id="stone-sub" style="margin-top:8px; color:#94a3b8;">
@@ -109,6 +117,7 @@
   <div id="panel-view">
     <div class="mcq-question" id="mcq-question"></div>
     <div class="mcq-options" id="mcq-options"></div>
+    <div class="proceed-msg" id="proceed-msg" hidden>Proceed next</div>
   </div>
 
   <script src="channel.js"></script>
