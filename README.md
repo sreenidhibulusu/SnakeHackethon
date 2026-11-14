@@ -1,20 +1,28 @@
-# SnakeHackethon
+# Jelling displays
 
-Serve this folder on your website. Keep each laptop connected to the internet
-with its own page open:
+Only two pages are needed. The `pair` parameter selects the station and its
+channel. Use the same pair on the laptop, NFC tag and proximity controller.
 
-| Location | Laptop page | URL to write to its NFC tag |
+| Pair | Laptop display | NFC tag URL |
 | --- | --- | --- |
-| 1 | `location1.html` | `https://YOUR-HOST/scan.html?location=1` |
-| 2 | `location2.html` | `https://YOUR-HOST/scan.html?location=2` |
-| 3 | `location3.html` | `https://YOUR-HOST/scan.html?location=3` |
+| 1 | `location.html?pair=1` | `https://YOUR-HOST/scan.html?pair=1` |
+| 2 | `location.html?pair=2` | `https://YOUR-HOST/scan.html?pair=2` |
+| 3 | `location.html?pair=3` | `https://YOUR-HOST/scan.html?pair=3` |
 
-Include the folder path in the tag URLs if the site is hosted in a subfolder.
-Opening the URL on a phone sends the scan through the existing ntfy channel.
-Only the matching laptop glows; it stays on its location page and returns to
-sleep after 30 seconds. A new scan restarts that timer. Loading a laptop page
-does not publish a scan. Tags pointing directly to `locationN.html` must be
-rewritten to the scan URLs above.
+Include the hosted folder path in the URLs. For example:
+`https://sreenidhibulusu.github.io/SnakeHackethon/scan.html?pair=3`.
 
-For a local demonstration, press **G** on a laptop to glow, **Escape** to sleep,
-or click the runestone / press **Space** to read its story.
+Update existing NFC tags from `locationN.html` to the matching `scan.html?pair=N`
+URL. The old numbered pages have been removed. Publish these changes before
+using the new URLs.
+
+The display says **Ready** when connected. Opening the scan URL sends
+`UNLOCK_N` to `jelling-snake-hackathon-2026-N`, making that pair’s display glow
+for 30 seconds. Repeated scans restart the timer. Loading a display does not
+send a scan. Both devices need internet access.
+
+The existing controller can send `GLOW_ON` / `GLOW_OFF` on the same channel,
+or call `window.setGlowState(true/false)` on the display. Clicking the runestone
+shows its station story. Press **G** to test glow and **Escape** to reset.
+
+`channel.js` and `display.js` are required scripts, not separate pages.
