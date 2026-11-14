@@ -48,6 +48,7 @@
 
   function activatePanel() {
     showState("active");
+    window.SnakeAnimation?.play();
   }
 
   // Original hook used by the proximity controller.

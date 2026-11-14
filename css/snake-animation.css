@@ -1,0 +1,40 @@
+.screen-snake {
+ width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  
+  position: fixed;
+  top: 50%;
+  left: 0;
+
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 99999;
+
+  animation:  snakeMove 8s linear infinite,
+              snakeSlither 1s ease-in-out infinite;   
+}
+
+
+
+.screen-snake[hidden] {
+  display: none;
+}
+
+@keyframes snakeMove {
+  0% {
+    left: -230px;
+  }
+  100% {
+    left: 100vw;
+  }
+}
+
+@keyframes snakeSlither {
+  0%, 100% {
+    transform: translateY(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(10deg);
+  }
+}
