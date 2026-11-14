@@ -25,4 +25,16 @@ The existing controller can send `GLOW_ON` / `GLOW_OFF` on the same channel,
 or call `window.setGlowState(true/false)` on the display. Clicking the runestone
 shows its station story. Press **G** to test glow and **Escape** to reset.
 
-`channel.js` and `display.js` are required scripts, not separate pages.
+On each display, click **Enable camera** and allow webcam access. A person
+near the center of the camera image, filling at least 20% of its width, makes
+that laptop glow. After about 1.5 seconds without a detection it sleeps.
+NFC glow and open stories keep their 30-second timers and are not interrupted
+by camera updates. Use **Disable camera** to stop the webcam.
+
+Camera detection runs in the browser; video is not uploaded. The detector
+downloads from MediaPipe on startup, so internet access is needed. Use HTTPS
+(including GitHub Pages) or localhost (including VS Code Live Server).
+Detection depends on lighting, framing and camera placement; it estimates
+presence in the image, not physical distance from the screen.
+
+`channel.js`, `display.js` and `presence.js` are required scripts, not separate pages.

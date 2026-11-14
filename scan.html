@@ -27,7 +27,7 @@
         status.textContent = "Unknown pair. Use scan.html?pair=1, 2 or 3.";
         return;
       }
-      document.getElementById("title").textContent = `Location ${locationId} — NFC tag scanned`;
+      document.getElementById("title").textContent = `Location ${locationId}. NFC tag scanned`;
       status.textContent = "Sending scan to the location display…";
       try {
         const response = await fetch(`https://ntfy.sh/${CHANNEL}`, {

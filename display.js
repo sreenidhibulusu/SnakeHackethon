@@ -32,17 +32,21 @@
   document.getElementById("station-story").textContent = station.story;
   document.getElementById("station-direction").innerHTML = station.direction;
   let resetTimer;
+  let personNear = false;
 
   function resetToSleep() {
     clearTimeout(resetTimer);
-    document.body.className = "state-sleep";
-    statusText.textContent = `Waiting for NFC scan — Location ${locationId}`;
+    resetTimer = null;
+    document.body.className = personNear ? "state-glow" : "state-sleep";
+    statusText.textContent = personNear
+      ? `Person detected. Location ${locationId}`
+      : `Waiting for visitor or NFC scan. Location ${locationId}`;
   }
 
   function showState(state) {
     clearTimeout(resetTimer);
     document.body.className = `state-${state}`;
-    statusText.textContent = `NFC scanned! — Location ${locationId}`;
+    statusText.textContent = `NFC scanned! Location ${locationId}`;
     resetTimer = setTimeout(resetToSleep, 30000);
   }
 
@@ -52,13 +56,9 @@
 
   // Original hook used by the proximity controller.
   window.setGlowState = (isNear) => {
-    if (document.body.className === "state-active") return;
-    if (isNear) {
-      showState("glow");
-      statusText.textContent = `The Runestone Awakens! — Location ${locationId}`;
-    } else {
-      resetToSleep();
-    }
+    personNear = Boolean(isNear);
+    // A camera update must not interrupt a scan glow or an open story.
+    if (!resetTimer) resetToSleep();
   };
 
   window.resetToSleep = resetToSleep;
@@ -67,10 +67,10 @@
   hint.textContent = "Connecting…";
   const events = new EventSource(`https://ntfy.sh/${window.jellingChannel}/sse`);
   events.onopen = () => {
-    hint.textContent = "Ready — scan this location’s NFC tag";
+    hint.textContent = "Ready. Scan this location’s NFC tag";
   };
   events.onerror = () => {
-    hint.textContent = "Disconnected — reconnecting… Check the internet connection.";
+    hint.textContent = "Disconnected. Reconnecting… Check the internet connection.";
   };
   events.onmessage = (event) => {
     try {

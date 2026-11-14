@@ -70,6 +70,8 @@
       border: 1px solid #94a3b8; color: #cbd5e1; border-radius: 6px;
       cursor: pointer;
     }
+    #camera-controls { position: fixed; bottom: 16px; left: 16px; right: 16px; font-size: 0.85rem; color: #94a3b8; }
+    #camera-controls button { padding: 8px 16px; margin-bottom: 6px; cursor: pointer; }
   </style>
 </head>
 <body class="state-sleep">
@@ -95,7 +97,14 @@
     </div>
   </div>
 
+  <div id="camera-controls">
+    <button id="camera-toggle" type="button">Enable camera</button>
+    <p id="camera-status" role="status">Camera off</p>
+    <video id="presence-camera" autoplay muted playsinline hidden></video>
+  </div>
+
   <script src="channel.js"></script>
   <script src="display.js"></script>
+  <script src="presence.js"></script>
 </body>
 </html>
