@@ -1,39 +1,22 @@
-# Build a Viking
+# Jelling displays
 
-The builder has four pages:
+Only two pages are needed. The `pair` parameter selects the station (`1`, `2`, or `3`) and its channel, while the `token` parameter identifies the visitor's unique NFC Serpent token (e.g., `token1`, `token2`).
 
-1. `index.html` — choose man or woman.
-2. `seasons.html` — choose spring, summer, autumn, or winter clothing.
-3. `weapons.html` — choose spear, bow, sword, or axe.
-4. `result.html` — see the finished Viking and type a name to display in runes.
+| Station (`pair`) | Laptop display URL | NFC Scan / Shortcut URL |
+| --- | --- | --- |
+| 1 | `location.html?pair=1` | `https://YOUR-HOST/scan.html?pair=1&token=token1` |
+| 2 | `location.html?pair=2` | `https://YOUR-HOST/scan.html?pair=2&token=token1` |
+| 3 | `location.html?pair=3` | `https://YOUR-HOST/scan.html?pair=3&token=token1` |
 
-Vikings begin unarmed in a patched, ragged tunic. Weapons and seasonal clothing
-appear only after selection.
+Include the hosted folder path in the URLs. For example:
+`https://sreenidhibulusu.github.io/SnakeHackethon/scan.html?pair=1&token=token1`.
 
-Click a choice to move to the next page. Back links preserve your choices.
-Start again clears the character choices. Choices and the NFC pair travel in
-URL parameters, so refreshing a page preserves the build.
+## Passing the NFC Token ID via Apple Shortcuts
+In Apple Shortcuts (Automation → NFC), scan each visitor's NFC token and either:
+- Open `https://sreenidhibulusu.github.io/SnakeHackethon/scan.html?pair=1&token=token1`, **or**
+- Use **Get Contents of URL** (`POST` to `https://ntfy.sh/jelling-snake-hackathon-2026-1`) with the body `UNLOCK_1:token1` (use `token2`, `token3`, etc. for other visitor tokens).
 
-`character.js` shares the illustration across the pages; `app.js` handles choices
-and rune naming. Keep these files alongside the HTML pages when hosting.
-
-## NFC scan
-
-Open `index.html` on the display. Write the hosted `scan.html` URL to its NFC
-tag. Opening that URL sends a signal that makes the display glow for 30 seconds.
-Another scan restarts the timer. Character choices and naming stay available.
-
-For example, if this workspace is hosted at `https://YOUR-HOST/`, use:
-
-- Display: `https://YOUR-HOST/build-a-viking/index.html?pair=1`
-- NFC tag: `https://YOUR-HOST/build-a-viking/scan.html?pair=1`
-
-Include the actual hosted folder path. Pairs `1`, `2`, and `3` are supported;
-omitting `pair` defaults to `1`. Use the same pair on both devices.
-
-Both devices need internet access. The display says **ready** once connected.
-Scans use the same ntfy.sh approach as SnakeHackethon, with separate channels
-`build-a-viking-hackathon-2026-N`. Loading the builder never sends a scan.
-
-Serve the folder using Live Server or a static website host. Publish these files
-before writing the hosted scan URL onto a tag.
+## Global MCQ Answer Storage (`window.visitorAnswers`)
+- Each station displays a multiple-choice question (MCQ) when unlocked by a visitor's NFC token.
+- Answers are stored in the global variable `window.visitorAnswers[tokenId][stationId]` and automatically synced across all station laptops via `https://ntfy.sh/jelling-snake-state-2026` and `localStorage`.
+- Each station's panel displays the active visitor's token ID (`window.currentVisitorToken`) and their combined progress/score across all 3 stations.
