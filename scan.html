@@ -7,13 +7,11 @@
   <style>
     body { margin: 0; min-height: 100vh; display: grid; place-content: center; text-align: center; padding: 20px; box-sizing: border-box; background: #090d16; color: #f1f5f9; font-family: system-ui, sans-serif; }
     h1 { color: #f59e0b; margin-bottom: 8px; }
-    .token-badge { display: inline-block; margin: 8px auto 16px; padding: 6px 12px; border-radius: 999px; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #f59e0b; font-size: 0.9rem; }
     button { padding: 12px 20px; cursor: pointer; margin-top: 12px; border-radius: 8px; border: 1px solid #f59e0b; background: #1e293b; color: #f1f5f9; }
   </style>
 </head>
 <body>
   <h1 id="title">NFC tag scanned</h1>
-  <div class="token-badge" id="token-display">Token: —</div>
   <p id="status" role="status">Sending scan to the location display…</p>
   <button id="retry" hidden>Try again</button>
   <script src="channel.js"></script>
@@ -23,14 +21,11 @@
     const tokenId = window.jellingToken;
     const status = document.getElementById("status");
     const retry = document.getElementById("retry");
-    const tokenDisplay = document.getElementById("token-display");
-
-    tokenDisplay.textContent = `Serpent Token ID: ${tokenId}`;
 
     async function sendScan() {
       retry.hidden = true;
       if (!["1", "2", "3"].includes(locationId)) {
-        status.textContent = "Unknown pair. Use scan.html?pair=1, 2 or 3 (&token=YOUR_TOKEN).";
+        status.textContent = "Unknown pair. Use scan.html?pair=1, 2 or 3.";
         return;
       }
       document.getElementById("title").textContent = `Location ${locationId} — NFC tag scanned`;
@@ -41,7 +36,7 @@
           body: `UNLOCK_${locationId}:${tokenId}`
         });
         if (!response.ok) throw new Error("Scan could not be sent");
-        status.textContent = `Scan sent for token "${tokenId}". Look for the glow on the Location ${locationId} display.`;
+        status.textContent = `Scan sent. Look for the glow on the Location ${locationId} display.`;
       } catch {
         status.textContent = "Could not send the scan. Check your connection and try again.";
         retry.hidden = false;
