@@ -4,15 +4,33 @@
   const locations = {
     "1": {
       question: "WHAT IS YOUR FAVORITE SEASON?",
-      options: ["SUMMER", "FALL", "WINTER", "SPRING"]
+      options: ["SUMMER", "FALL", "WINTER", "SPRING"],
+      icons: {
+        SUMMER: "picture/clothing/striped-tunic.png",
+        FALL: "picture/clothing/fur-tunic.png",
+        WINTER: "picture/clothing/fur-cloak.png",
+        SPRING: "picture/clothing/belted-tunic.png"
+      }
     },
     "2": {
       question: "VIKING, CHOOSE YOUR WEAPON!",
-      options: ["SPEAR", "SWORD", "AXE", "KNIFE"]
+      options: ["SPEAR", "SWORD", "AXE", "KNIFE"],
+      icons: {
+        SPEAR: "picture/weapons/spear.png",
+        SWORD: "picture/weapons/sword.png",
+        AXE: "picture/weapons/axe.png",
+        KNIFE: "picture/weapons/knife.png"
+      }
     },
     "3": {
       question: "WHO WILL BE YOUR MENTOR?",
-      options: ["GORM THE OLD", "KNUD", "THYRA", "NO ONE"]
+      options: ["GORM THE OLD", "KNUD", "THYRA", "NO ONE"],
+      icons: {
+        "GORM THE OLD": "picture/mentors/drinking-horn.png",
+        KNUD: "picture/mentors/helmet.png",
+        THYRA: "picture/mentors/hooded-cloak.png",
+        "NO ONE": "picture/mentors/arm-wraps.png"
+      }
     }
   };
 
@@ -34,6 +52,10 @@
 
   let resetTimer;
 
+  // TEMP for testing: add &test=1 to the URL to skip the NFC scan and
+  // stay on the question (no 30s auto-reset). Remove before going live.
+  const testMode = new URLSearchParams(window.location.search).get("test") === "1";
+
   function saveAnswerLocally(token, stationId, answer) {
     if (!window.visitorAnswers[token]) {
       window.visitorAnswers[token] = {};
@@ -49,7 +71,7 @@
     proceedMsg.hidden = false;
 
     clearTimeout(resetTimer);
-    resetTimer = setTimeout(resetToSleep, 30000);
+    if (!testMode) resetTimer = setTimeout(resetToSleep, 30000);
 
     fetch(`https://ntfy.sh/${window.jellingStateChannel}`, {
       method: "POST",
@@ -75,7 +97,23 @@
     station.options.forEach((optText) => {
       const btn = document.createElement("button");
       btn.className = "mcq-btn";
-      btn.textContent = optText;
+
+      const icon = station.icons?.[optText];
+      if (icon) {
+        btn.classList.add("has-icon");
+        const badge = document.createElement("span");
+        badge.className = "mcq-badge";
+        const img = document.createElement("img");
+        img.src = icon;
+        img.alt = "";
+        badge.appendChild(img);
+        btn.appendChild(badge);
+      }
+
+      const label = document.createElement("span");
+      label.className = "mcq-label";
+      label.textContent = optText;
+      btn.appendChild(label);
 
       if (existing === optText) {
         btn.classList.add("selected");
@@ -101,11 +139,15 @@
       proceedMsg.hidden = true;
       renderMCQ();
     }
-    resetTimer = setTimeout(resetToSleep, 30000);
+    if (!testMode) resetTimer = setTimeout(resetToSleep, 30000);
   }
 
   window.showState = showState;
-  resetToSleep();
+  if (testMode) {
+    showState("active");
+  } else {
+    resetToSleep();
+  }
 
   fetch(`https://ntfy.sh/${window.jellingStateChannel}/json?poll=1`)
     .then((res) => res.text())
