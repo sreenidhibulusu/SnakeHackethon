@@ -43,10 +43,12 @@
   const proceedMsg = document.getElementById("proceed-msg");
   const station = locations[locationId];
 
+  if (!statusText) return;
+
   if (!station) {
     statusText.textContent = "Choose a location";
     hint.textContent = "Use location.html?pair=1, 2 or 3.";
-    document.getElementById("stone-view").removeAttribute("onclick");
+    document.getElementById("stone-view")?.removeAttribute("onclick");
     return;
   }
 
@@ -129,19 +131,33 @@
     proceedMsg.hidden = true;
     document.body.className = "state-sleep";
     statusText.textContent = `Waiting for NFC scan — Location ${locationId}`;
+    hint.textContent = "Step closer or scan this location’s NFC tag";
   }
 
   function showState(state) {
     clearTimeout(resetTimer);
     document.body.className = `state-${state}`;
-    statusText.textContent = `NFC scanned — Location ${locationId}`;
-    if (state === "active") {
+    if (state === "glow") {
+      statusText.textContent = `The Runestone Awakens! — Tap the Snake`;
+      hint.textContent = `Scan your NFC Serpent at Location ${locationId}`;
+    } else if (state === "active") {
+      statusText.textContent = `NFC scanned — Location ${locationId}`;
       proceedMsg.hidden = true;
       renderMCQ();
     }
     if (!testMode) resetTimer = setTimeout(resetToSleep, 30000);
   }
 
+  window.setGlowState = (isNear) => {
+    if (document.body.className === "state-active") return;
+    if (isNear) {
+      showState("glow");
+    } else {
+      resetToSleep();
+    }
+  };
+
+  window.resetToSleep = resetToSleep;
   window.showState = showState;
   if (testMode) {
     showState("active");
@@ -177,7 +193,9 @@
   hint.textContent = "Connecting…";
   const events = new EventSource(`https://ntfy.sh/${window.jellingChannel}/sse`);
   events.onopen = () => {
-    hint.textContent = "Ready — scan this location’s NFC tag";
+    if (document.body.className === "state-sleep") {
+      hint.textContent = "Ready — step closer or scan this location’s NFC tag";
+    }
   };
   events.onerror = () => {
     hint.textContent = "Disconnected — reconnecting… Check the internet connection.";
@@ -195,15 +213,15 @@
         }
         showState("active");
       } else if (trimmed === "GLOW_ON") {
-        if (document.body.className !== "state-active") {
-          showState("glow");
-          statusText.textContent = `The Runestone Awakens! — Location ${locationId}`;
-        }
+        window.setGlowState(true);
       } else if (trimmed === "GLOW_OFF") {
-        if (document.body.className !== "state-active") {
-          resetToSleep();
-        }
+        window.setGlowState(false);
       }
     } catch {}
   };
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "g") window.setGlowState(true);
+    if (event.key === "Escape") resetToSleep();
+  });
 })();

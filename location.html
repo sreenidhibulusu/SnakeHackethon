@@ -25,8 +25,11 @@
     <div class="proceed-msg" id="proceed-msg" hidden>Proceed next</div>
   </div>
 
+  <video id="webcam" autoplay playsinline muted aria-hidden="true"></video>
+
   <script src="js/channel.js"></script>
   <script>document.documentElement.dataset.pair = window.jellingPair;</script>
   <script src="js/display.js"></script>
+  <script type="module" src="js/vision.js"></script>
 </body>
 </html>

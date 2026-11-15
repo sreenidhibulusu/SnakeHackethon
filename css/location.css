@@ -168,3 +168,13 @@ body.state-active #panel-view {
   font-weight: 600;
   letter-spacing: 0.05em;
 }
+
+#webcam {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
