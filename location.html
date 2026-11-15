@@ -6,7 +6,8 @@
   <title>Location Display | Jelling Guide</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <!-- loaded without blocking, so the page still works if the internet is slow or down -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="css/location.css">
 </head>
 <body class="state-sleep">
@@ -22,12 +23,19 @@
   <div id="panel-view">
     <div class="mcq-question" id="mcq-question"></div>
     <div class="mcq-options" id="mcq-options"></div>
+    <div class="viking-model" id="viking-model" hidden>
+      <div class="viking-art" id="viking-art"></div>
+      <p class="viking-summary" id="viking-summary"></p>
+      <p class="viking-hint" id="viking-hint"></p>
+      <button class="change-btn" id="change-answer" type="button">Change answer</button>
+    </div>
     <div class="proceed-msg" id="proceed-msg" hidden>Proceed next</div>
   </div>
 
   <video id="webcam" autoplay playsinline muted aria-hidden="true"></video>
 
   <script src="js/channel.js"></script>
+  <script src="js/viking-model.js"></script>
   <script>document.documentElement.dataset.pair = window.jellingPair;</script>
   <script src="js/display.js"></script>
   <script type="module" src="js/vision.js"></script>

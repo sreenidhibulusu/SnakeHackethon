@@ -41,6 +41,7 @@
   const statusText = document.getElementById("stone-status");
   const hint = document.getElementById("stone-sub");
   const proceedMsg = document.getElementById("proceed-msg");
+  const modelEl = document.getElementById("viking-model");
   const station = locations[locationId];
 
   if (!statusText) return;
@@ -69,7 +70,7 @@
   function recordMCQAnswer(choiceText) {
     const token = window.currentVisitorToken;
     saveAnswerLocally(token, locationId, choiceText);
-    renderMCQ();
+    showVikingModel();
     proceedMsg.hidden = false;
 
     clearTimeout(resetTimer);
@@ -86,10 +87,34 @@
     }).catch(() => {});
   }
 
+  // After answering: swap the options for the visitor's Viking, built
+  // from every station they've answered so far.
+  function showVikingModel() {
+    const answers = window.visitorAnswers[window.currentVisitorToken] || {};
+    window.renderVikingModel(document.getElementById("viking-art"), answers);
+
+    const chosen = ["1", "2", "3"].map((id) => answers[id]).filter(Boolean);
+    document.getElementById("viking-summary").textContent = chosen.join(" · ");
+    const missing = 3 - chosen.length;
+    document.getElementById("viking-hint").textContent = missing
+      ? `Visit ${missing} more runestone${missing > 1 ? "s" : ""} to complete your Viking`
+      : "Your Viking is complete!";
+
+    document.getElementById("mcq-options").hidden = true;
+    modelEl.hidden = false;
+  }
+
+  document.getElementById("change-answer").addEventListener("click", () => {
+    proceedMsg.hidden = true;
+    renderMCQ();
+  });
+
   function renderMCQ() {
     const token = window.currentVisitorToken;
     const questionEl = document.getElementById("mcq-question");
     const optionsEl = document.getElementById("mcq-options");
+    optionsEl.hidden = false;
+    modelEl.hidden = true;
 
     questionEl.textContent = station.question;
     optionsEl.innerHTML = "";
