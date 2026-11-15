@@ -1,30 +1,46 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Choose your Viking | Build a Viking</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="character.js" defer></script>
-  <script src="app.js" defer></script>
-  <script src="channel.js" defer></script>
-  <script src="display.js" defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Choose your Viking | Build a Viking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="character.js" defer></script>
+    <script src="storage.js?v=station-views-5" defer></script>
+    <script src="app.js?v=station-views-5" defer></script>
+    <script src="channel.js?v=station-views-5" defer></script>
+    <script src="display.js?v=station-views-5" defer></script>
 </head>
+
 <body data-page="start">
-  <main>
-    <p class="step">Build a Viking · 1 / 4</p>
-    <h1>Choose your Viking</h1>
-    <p id="scan-connection" role="status">Connecting to NFC scans…</p>
-    <div class="builder">
-      <section class="preview" aria-label="Your Viking">
-        <div id="character-art"></div>
-        <h2 id="preview-name"></h2>
-      </section>
-      <section class="customize" aria-label="Choose your Viking">
-        <h2>Man or woman?</h2><div class="options" id="choices"></div>
-        <nav aria-label="Build steps"></nav>
-      </section>
-    </div>
-  </main>
+    <main>
+        <p class="step">Starting station</p>
+        <h1>Choose your Viking</h1>
+        <p id="scan-connection" role="status">Connecting to NFC scans…</p>
+        <div class="builder" hidden>
+            <section id="viking-view" class="preview" aria-label="Your accumulated Viking" tabindex="-1" hidden>
+                <div id="character-art"></div>
+                <h2 id="preview-name"></h2>
+                <p id="preview-latin-name"></p>
+                <p id="token-label"></p>
+                <button id="pick-again" type="button">Pick again</button>
+                <button id="done" type="button">Done</button>
+            </section>
+            <section id="choice-view" tabindex="-1" class="customize" aria-label="Choose your Viking">
+                <label for="viking-name">Name your Viking</label>
+                <input id="viking-name" maxlength="32" placeholder="Name your Viking" autocomplete="off"
+                    aria-describedby="rune-help">
+                <p id="rune-help">Your name appears in runes. A simple letter conversion.</p>
+
+                <h2>Man or woman?</h2>
+                <div class="options" id="choices"></div>
+                <button id="reset-viking" type="button">Reset Viking</button>
+                <button id="show-viking" type="button">Show my Viking</button>
+                <p id="save-status" role="status"></p>
+            </section>
+        </div>
+    </main>
 </body>
+
 </html>

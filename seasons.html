@@ -1,30 +1,40 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Choose a season | Build a Viking</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="character.js" defer></script>
-  <script src="app.js" defer></script>
-  <script src="channel.js" defer></script>
-  <script src="display.js" defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Choose a season | Build a Viking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="character.js" defer></script>
+    <script src="storage.js?v=station-views-5" defer></script>
+    <script src="app.js?v=station-views-5" defer></script>
+    <script src="channel.js?v=station-views-5" defer></script>
+    <script src="display.js?v=station-views-5" defer></script>
 </head>
+
 <body data-page="seasons">
-  <main>
-    <p class="step">Build a Viking · 2 / 4</p>
-    <h1>Choose a season</h1>
-    <p id="scan-connection" role="status">Connecting to NFC scans…</p>
-    <div class="builder">
-      <section class="preview" aria-label="Your Viking">
-        <div id="character-art"></div>
-        <h2 id="preview-name"></h2>
-      </section>
-      <section class="customize" aria-label="Choose a season">
-        <h2>Pick your clothing.</h2><div class="options" id="choices"></div>
-        <nav aria-label="Build steps"><a data-destination="index.html" href="index.html">← Back</a></nav>
-      </section>
-    </div>
-  </main>
+    <main>
+        <p class="step">Clothing station</p>
+        <h1>Choose a season</h1>
+        <p id="scan-connection" role="status">Connecting to NFC scans…</p>
+        <div class="builder" hidden>
+            <section id="viking-view" class="preview" aria-label="Your accumulated Viking" tabindex="-1" hidden>
+                <div id="character-art"></div>
+                <h2 id="preview-name"></h2>
+                <p id="preview-latin-name"></p>
+                <p id="token-label"></p>
+                <button id="pick-again" type="button">Pick again</button>
+                <button id="done" type="button">Done</button>
+            </section>
+            <section id="choice-view" tabindex="-1" class="customize" aria-label="Choose a season">
+                <h2>Pick your clothing.</h2>
+                <div class="options" id="choices"></div>
+                <button id="show-viking" type="button">Show my Viking</button>
+                <p id="save-status" role="status"></p>
+            </section>
+        </div>
+    </main>
 </body>
+
 </html>

@@ -12,10 +12,10 @@ const seasons = {
     winter: { name: 'Winter', icon: '❄', title: 'The Frostguard', description: 'A wool tunic, fur mantle, and heavy boots to brave the northern cold.', light: '#60776c', dark: '#344e46', cape: '#58695e', region: 'THE FROSTLANDS', label: 'Cozy & rugged', explorer: 'Winter explorer', fur: true }
 };
 const runeLetters = {
-    a:'ᚨ', b:'ᛒ', c:'ᚲ', d:'ᛞ', e:'ᛖ', f:'ᚠ', g:'ᚷ', h:'ᚺ',
-    i:'ᛁ', j:'ᛃ', k:'ᚲ', l:'ᛚ', m:'ᛗ', n:'ᚾ', o:'ᛟ', p:'ᛈ',
-    q:'ᚲ', r:'ᚱ', s:'ᛋ', t:'ᛏ', u:'ᚢ', v:'ᚹ', w:'ᚹ', x:'ᚲᛋ',
-    y:'ᛁ', z:'ᛉ', æ:'ᚨᛖ', ø:'ᛟ', å:'ᚨ', þ:'ᚦ', ð:'ᚦ'
+    a: 'ᚨ', b: 'ᛒ', c: 'ᚲ', d: 'ᛞ', e: 'ᛖ', f: 'ᚠ', g: 'ᚷ', h: 'ᚺ',
+    i: 'ᛁ', j: 'ᛃ', k: 'ᚲ', l: 'ᛚ', m: 'ᛗ', n: 'ᚾ', o: 'ᛟ', p: 'ᛈ',
+    q: 'ᚲ', r: 'ᚱ', s: 'ᛋ', t: 'ᛏ', u: 'ᚢ', v: 'ᚹ', w: 'ᚹ', x: 'ᚲᛋ',
+    y: 'ᛁ', z: 'ᛉ', æ: 'ᚨᛖ', ø: 'ᛟ', å: 'ᚨ', þ: 'ᚦ', ð: 'ᚦ'
 };
 function toRunes(name) {
     return name.toLowerCase().replace(/th/g, 'þ').normalize('NFD')
@@ -25,40 +25,117 @@ function toRunes(name) {
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(window.location.search);
-const state = {
-    gender: params.get('gender') === 'woman' ? 'woman' : 'man',
-    weapon: Object.hasOwn(weapons, params.get('weapon')) ? params.get('weapon') : '',
-    season: Object.hasOwn(seasons, params.get('season')) ? params.get('season') : '',
-    name: (params.get('name') || '').slice(0, 32)
-};
+const emptyViking = () => ({ gender: 'man', weapon: '', season: '', name: '' });
+const state = emptyViking();
+let currentToken = '';
+let loadVersion = 0;
+let saveQueue = Promise.resolve();
+let saveError = false;
 const page = document.body.dataset.page;
 const defaults = { man: 'Eirik', woman: 'Freya' };
-function pageUrl(file, changes = {}, reset = false) {
-    const query = new URLSearchParams();
-    if (params.has('pair')) query.set('pair', params.get('pair'));
-    if (!reset) {
-        for (const [key, value] of Object.entries({...state, ...changes})) {
-            if (value) query.set(key, value);
-        }
-    }
-    return file + (query.size ? '?' + query.toString() : '');
+function updateUrl() {
+    const query = new URLSearchParams(window.location.search);
+    // Character choices belong to the token profile, rather than being copied between visitors.
+    for (const key of ['gender', 'weapon', 'season', 'name']) query.delete(key);
+    if (currentToken) query.set('token', currentToken);
+    else query.delete('token');
+    try { window.history.replaceState(null, '', window.location.pathname + '?' + query.toString()); } catch { }
 }
+function saveChoices(changes, reset = false) {
+    const token = currentToken;
+    const status = $('save-status');
+    try {
+        if (!token) throw new Error('Scan a token before saving your Viking.');
+        // localStorage writes are synchronous: persist before another page can read the profile.
+        if (reset) window.vikingStore.reset(token);
+        else window.vikingStore.save(token, page, changes);
+        if (reset) applyProfile(emptyViking());
+        if (status) status.textContent = reset ? 'Viking reset. Your token is ready to start again.' : 'Saved in this browser.';
+        saveError = false;
+        saveQueue = Promise.resolve();
+    } catch (error) {
+        saveError = true;
+        if (status) status.textContent = error.message;
+        saveQueue = Promise.reject(error);
+        saveQueue.catch(() => {});
+    }
+}
+function saveNameFromField() {
+    if (page !== 'start' || !$('viking-name')) return;
+    state.name = $('viking-name').value.slice(0, 32);
+    saveChoices({name: state.name});
+    render();
+}
+function normalizeProfile(profile) {
+    return {
+        gender: profile.gender === 'woman' ? 'woman' : 'man',
+        weapon: Object.hasOwn(weapons, profile.weapon) ? profile.weapon : '',
+        season: Object.hasOwn(seasons, profile.season) ? profile.season : '',
+        name: typeof profile.name === 'string' ? profile.name.slice(0, 32) : ''
+    };
+}
+function applyProfile(profile) {
+    Object.assign(state, normalizeProfile(profile));
+    if ($('viking-name')) $('viking-name').value = state.name;
+    render();
+}
+function showStationView(view) {
+    const isViking = page === 'result' || view === 'viking';
+    $('viking-view').hidden = !isViking;
+    if (page !== 'result') $('choice-view').hidden = isViking;
+    $(isViking ? 'viking-view' : 'choice-view').focus();
+}
+window.vikingApp = {
+    beginVisit() { showStationView(page === 'result' ? 'viking' : 'choice'); },
+    get token() { return currentToken; },
+    async finish() {
+        if (!currentToken) throw new Error('Scan a token before saving your Viking.');
+        saveNameFromField();
+        await saveQueue;
+        if (saveError) throw new Error('Your changes could not be saved. Try your selection again.');
+    },
+    async selectToken(token) {
+        if (!window.vikingStore.validToken(token)) throw new Error('Invalid token ID.');
+        const version = ++loadVersion;
+        await saveQueue;
+        const profile = normalizeProfile(await window.vikingStore.load(token));
+        if (version !== loadVersion) return false;
+        // Preserve the current form when nothing changed, but recover updates from other stations.
+        if (token === currentToken && JSON.stringify(profile) === JSON.stringify(state)) return false;
+        currentToken = token;
+        applyProfile(profile);
+        if ($('save-status')) $('save-status').textContent = '';
+
+        updateUrl();
+        render();
+        return true;
+    }
+};
 $('character-art').innerHTML = window.vikingIllustration;
-const choices = page === 'start' ? { man: {name:'Man'}, woman: {name:'Woman'} }
-    : page === 'weapons' ? weapons : page === 'seasons' ? seasons : null;
-const key = {start:'gender', weapons:'weapon', seasons:'season'}[page];
-const next = {start:'seasons.html', seasons:'weapons.html', weapons:'result.html'}[page];
-if (choices) {
-    for (const [value, choice] of Object.entries(choices)) {
-        const link = document.createElement('a');
-        link.className = 'option';
-        link.textContent = choice.name;
-        link.href = pageUrl(next, {[key]:value});
-        $('choices').append(link);
+const choiceGroups = page === 'start'
+    ? [
+        { field: 'gender', container: 'choices', values: { man: { name: 'Man' }, woman: { name: 'Woman' } } }
+    ]
+    : page === 'weapons' ? [{ field: 'weapon', container: 'choices', values: weapons }]
+        : page === 'seasons' ? [{ field: 'season', container: 'choices', values: seasons }] : [];
+for (const group of choiceGroups) {
+    for (const [value, choice] of Object.entries(group.values)) {
+        const button = document.createElement('button');
+        button.className = 'option';
+        button.type = 'button';
+        button.dataset.choice = value;
+        button.dataset.field = group.field;
+        button.textContent = choice.name;
+        button.addEventListener('click', () => {
+            state[group.field] = value;
+            render();
+            saveChoices({ [group.field]: value });
+        });
+        $(group.container).append(button);
     }
 }
 function render() {
-    const season = seasons[state.season] || {name: 'Ragged clothing', light: '#a49678', dark: '#776b53', cape: '#776b53', fur: false};
+    const season = seasons[state.season] || { name: 'Ragged clothing', light: '#a49678', dark: '#776b53', cape: '#776b53', fur: false };
     const weapon = weapons[state.weapon];
     const ragged = !state.season;
     const tunicShape = ragged
@@ -71,6 +148,7 @@ function render() {
         $(id).style.display = ragged ? 'none' : '';
     }
     $('helmet').style.display = 'none';
+    console.log(state.name);
     const name = state.name.trim() || defaults[state.gender];
     $('viking').style.setProperty('--cloth-light', season.light);
     $('viking').style.setProperty('--cloth-dark', season.dark);
@@ -85,21 +163,69 @@ function render() {
     $('hair').setAttribute('d', state.gender === 'woman'
         ? 'M216 153q-15-53 23-58 9-16 35-9 41 2 33 67l9 89-15 25-12-15 5-125q-36 12-62-2l-4 127-13 15-14-25Z'
         : 'M216 153q-15-53 23-58 9-16 35-9 41 2 33 67l-13-26q-36 12-62-2Z');
-    $('preview-name').textContent = page === 'result' ? toRunes(name) : '';
+    $('token-label').textContent = currentToken ? `Token: ${currentToken}` : '';
+    $('preview-name').textContent = toRunes(name);
+    $('preview-latin-name').textContent = name;
     $('preview-name').setAttribute('aria-label', name);
     $('character-title').textContent = `${name}, Viking ${state.gender}, ${weapon ? 'holding a ' + weapon.name.toLowerCase() : 'unarmed'}, ${ragged ? 'simple ragged clothing' : season.name.toLowerCase() + ' clothing'}`;
     if ($('result-summary')) $('result-summary').textContent = `${state.gender === 'woman' ? 'Woman' : 'Man'} · ${weapon?.name || 'No weapon'} · ${season.name}`;
-    document.querySelectorAll('[data-destination]').forEach(link => {
-        link.href = pageUrl(link.dataset.destination, {}, link.hasAttribute('data-reset'));
+    document.querySelectorAll('[data-choice]').forEach(button => {
+        button.setAttribute('aria-pressed', String(state[button.dataset.field] === button.dataset.choice));
     });
 }
 if ($('viking-name')) {
     $('viking-name').value = state.name;
-    $('viking-name').addEventListener('input', event => {
-        state.name = event.target.value;
-        render();
-        // Keep the current name when the result is refreshed or shared.
-        try { window.history.replaceState(null, '', pageUrl('result.html')); } catch {}
+    $('viking-name').addEventListener('input', saveNameFromField);
+    $('viking-name').addEventListener('change', saveNameFromField);
+}
+if (page === 'start') {
+    $('reset-viking').addEventListener('click', async () => {
+        if (!currentToken) return;
+        const controls = [...document.querySelector('.builder').querySelectorAll('button, input')];
+        controls.forEach(control => { control.disabled = true; });
+        saveChoices(emptyViking(), true);
+        try { await saveQueue; } catch { /* Save errors are shown by saveChoices. */ }
+        finally { controls.forEach(control => { control.disabled = false; }); }
     });
 }
 render();
+
+// Suspended/background tabs can miss storage events. Recheck when revisiting the station.
+async function refreshSavedViking() {
+    const token = currentToken;
+    const version = loadVersion;
+    if (!token) return;
+    try {
+        await saveQueue;
+        const profile = normalizeProfile(await window.vikingStore.load(token));
+        if (token === currentToken && version === loadVersion && JSON.stringify(profile) !== JSON.stringify(state)) {
+            applyProfile(profile);
+        }
+    } catch (error) {
+        if ($('save-status')) $('save-status').textContent = error.message;
+    }
+}
+window.addEventListener('focus', refreshSavedViking);
+window.addEventListener('pageshow', refreshSavedViking);
+window.addEventListener('storage', event => {
+    if (!currentToken || event.storageArea !== localStorage || event.key !== window.vikingStore.keyFor(currentToken)) return;
+    return refreshSavedViking();
+});
+
+// Keep visible station previews in sync even if a browser drops a storage event.
+window.setInterval(() => {
+    if (!document.hidden) return refreshSavedViking();
+}, 1000);
+
+if (page !== 'result') {
+    $('show-viking').addEventListener('click', async () => {
+        const token = currentToken;
+        try {
+            await window.vikingApp.finish();
+            if (token === currentToken) showStationView('viking');
+        } catch (error) {
+            $('save-status').textContent = error.message;
+        }
+    });
+    $('pick-again').addEventListener('click', () => showStationView('choice'));
+}
