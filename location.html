@@ -4,34 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Location Display | Jelling Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/location.css">
-  <link rel="stylesheet" href="css/snake-animation.css">
 </head>
 <body class="state-sleep">
 
-  <div id="stone-view" onclick="activatePanel()">
+  <div id="stone-view" onclick="showState('active')">
     <div class="rune-symbol">ᚼᛒ</div>
     <h2 id="stone-status" aria-live="polite">Waiting for NFC scan</h2>
-    <p id="stone-sub">
+    <p id="stone-sub" style="margin-top:8px; color:#94a3b8;">
       Scan this location’s NFC tag to awaken the runestone
     </p>
   </div>
 
   <div id="panel-view">
-    <div class="snake-container">
-      <span role="img" aria-label="Serpent" class="serpent-icon">🐍</span>
-    </div>
-
-    <div class="panel-card">
-      <h1 class="panel-title" id="station-title"></h1>
-      <p class="panel-story" id="station-story"></p>
-      <div class="direction-box" id="station-direction"></div>
-      <button class="reset-btn" onclick="resetToSleep()">Put Stone to Sleep</button>
-    </div>
+    <div class="mcq-question" id="mcq-question"></div>
+    <div class="mcq-options" id="mcq-options"></div>
+    <div class="proceed-msg" id="proceed-msg" hidden>Proceed next</div>
   </div>
 
-  <script src="js/snake-animation.js"></script>
   <script src="js/channel.js"></script>
+  <script>document.documentElement.dataset.pair = window.jellingPair;</script>
   <script src="js/display.js"></script>
 </body>
 </html>

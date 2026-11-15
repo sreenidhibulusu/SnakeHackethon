@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Viking | Build a Viking</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/character.js" defer></script>
+  <script src="js/app.js" defer></script>
+  <script src="js/channel.js" defer></script>
+  <script src="js/display.js" defer></script>
+</head>
+<body data-page="result">
+  <main>
+    <p class="step">Build a Viking · 4 / 4</p>
+    <h1>Your Viking</h1>
+    <p id="scan-connection" role="status">Connecting to NFC scans…</p>
+    <div class="builder">
+      <section class="preview" aria-label="Your Viking">
+        <div id="character-art"></div>
+        <h2 id="preview-name"></h2>
+      </section>
+      <section class="customize" aria-label="Your Viking">
+        <label for="viking-name">Name your Viking</label>
+          <input id="viking-name" maxlength="32" placeholder="Type your name" autocomplete="off" aria-describedby="rune-help">
+          <p id="rune-help">Your name appears in runes. A simple letter conversion.</p>
+          <p id="result-summary"></p>
+        <nav aria-label="Build steps"><a data-destination="weapons.html" href="weapons.html">← Back</a><a data-destination="index.html" data-reset href="index.html">Start again</a></nav>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

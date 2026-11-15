@@ -1,6 +1,7 @@
 (() => {
   const CHANNEL = window.jellingChannel;
   const locationId = window.jellingPair;
+  const tokenId = window.jellingToken;
   const status = document.getElementById("status");
   const retry = document.getElementById("retry");
 
@@ -15,7 +16,7 @@
     try {
       const response = await fetch(`https://ntfy.sh/${CHANNEL}`, {
         method: "POST",
-        body: `UNLOCK_${locationId}`
+        body: `UNLOCK_${locationId}:${tokenId}`
       });
       if (!response.ok) throw new Error("Scan could not be sent");
       status.textContent = `Scan sent. Look for the glow on the Location ${locationId} display.`;
